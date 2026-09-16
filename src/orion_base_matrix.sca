@@ -1,0 +1,80 @@
+// ============================================================================
+// MODULE: ORION MULTI-PURPOSE CREW VEHICLE (MPCV) FOUNDATION FLANGE
+// REPOSITORY PATH: src/orion_base_matrix.scad
+// HARDWARE REQUIREMENT: 16.5-FOOT (198.0" OD) MASTER BOOSTER INTERFACE
+// COMPLIANCE: INTEGRATED ISOGRID STEP BOUNDARY / ZERO HULL BREACH METHOD
+// ============================================================================
+
+$fn = 240; // Max circular fidelity for heavy multi-axis CNC machining path sweeps
+
+// --- ORION TECHNICAL GEOMETRY CONSTANTS (INCHES) ---
+ORION_BASE_OD = 198.0;       // Master base diameter of deep-space capsule (16.5 Feet)
+ORION_APEX_OD = 55.0;        // Forward docking mechanism interface ring diameter
+ORION_HEIGHT = 132.0;        // Total vertical height of pressure vessel shell
+ISOGRID_CEILING = 0.093;     // Thick structural rib floor profile for Al-Li 2195 alloy
+SKIN_WALL_THICK = 0.035;     // Nominal milled pocket skin thickness baseline
+BUS_WAY_WIDTH = 0.375;       // Width of 16-state optoelectronic bus tracking channels
+
+module OrionHeavyBaseRingForging() {
+    echo("CNC Track: Milling 16.5-Foot Orion Base Ring From Solid Al-Li 2195 Stock");
+    color("Silver")
+    difference() {
+        // 1. Primary heavy forging foundation loop block ring blank (5.0" height)
+        cylinder(h = 5.0, r = ORION_BASE_OD / 2, center = true);
+        
+        // 2. Central hollow bore clearing space for deep-space payload bays
+        translate([0, 0, -3.0])
+        cylinder(h = 7.0, r = (ORION_BASE_OD / 2) - 2.50); // Robust 2.5-inch solid wall
+        
+        // 3. Upper Step Shoulder: Precision shelf to flush-weld your 0.035" structural skins
+        translate([0, 0, 1.5])
+        cylinder(h = 1.1, r = (ORION_BASE_OD / 2) - SKIN_WALL_THICK);
+        
+        // 4. 6-Point Symmetrical Structural Anchor Lock Sockets (60-degree offsets)
+        for (latch = [0 : 60 : 360]) {
+            rotate([0, 0, latch])
+            translate([ORION_BASE_OD / 2 - 1.0, -3.0, -3.0])
+            cube([2.0, 6.0, 6.0]); // Fast-latch pockets for adapter collar hooks
+        }
+    }
+}
+
+module IntegratedIsogridFloorMatrix() {
+    echo("CNC Track: Patterning High-Load Triangular Isogrid Support Skeleton");
+    color("DarkSlateGray")
+    union() {
+        // 24 primary load-bearing structural spokes routing acceleration vectors straight to the ring
+        for (spoke = [0 : 15 : 360]) {
+            rotate([0, 0, spoke])
+            translate([0, -ISOGRID_CEILING / 2, -1.5])
+            cube([(ORION_BASE_OD / 2) - 2.50 + 0.1, ISOGRID_CEILING, 1.5]);
+        }
+        
+        // Intersecting concentric stabilizer bands forming the structural cells
+        for (r_step = [ORION_BASE_OD / 5, ORION_BASE_OD / 3, ORION_BASE_OD / 2.2]) {
+            difference() {
+                translate([0, 0, -1.5]) cylinder(h = 1.5, r = r_step);
+                translate([0, 0, -1.6]) cylinder(h = 1.7, r = r_step - ISOGRID_CEILING);
+            }
+        }
+    }
+}
+
+module SnapCircuitOrionBaseBus() {
+    echo("CNC Track: Engraving Coaxial 16-State Hexadecimal Data Trace Paths");
+    color("Gold")
+    translate([0, 0, 2.1]) // Embedded natively into base loop shoulder lip
+    difference() {
+        cylinder(h = 0.05, r = (ORION_BASE_OD / 2) - 2.7);
+        cylinder(h = 0.12, r = (ORION_BASE_OD / 2) - 2.7 - BUS_WAY_WIDTH);
+    }
+}
+
+// ============================================================================
+// CNC WORKSTATION FIELD VERIFICATION VIEWPORT DISPLAY
+// ============================================================================
+union() {
+    OrionHeavyBaseRingForging();
+    IntegratedIsogridFloorMatrix();
+    SnapCircuitOrionBaseBus();
+}
